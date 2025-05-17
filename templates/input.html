@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Input Page - Timetable Scheduler</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #dbefff, #f0fcff);
+      margin: 0;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+    }
+
+    form {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .section {
+      background: #ffffff;
+      padding: 25px;
+      margin-bottom: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .section h3 {
+      margin-top: 0;
+      color: #2980b9;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      color: #333;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1e8449;
+    }
+
+    .checkbox-group label {
+      display: inline-block;
+      margin-right: 15px;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    hr {
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Schedule Input Form</h1>
+
+  <form action="/generate" method="post">
+
+    <!-- Working Days -->
+    <div class="section">
+      <h3>Working Days</h3>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="working_days" value="Monday"> Monday</label>
+        <label><input type="checkbox" name="working_days" value="Tuesday"> Tuesday</label>
+        <label><input type="checkbox" name="working_days" value="Wednesday"> Wednesday</label>
+        <label><input type="checkbox" name="working_days" value="Thursday"> Thursday</label>
+        <label><input type="checkbox" name="working_days" value="Friday"> Friday</label>
+        <label><input type="checkbox" name="working_days" value="Saturday"> Saturday</label>
+      </div>
+    </div>
+
+    <!-- Hours Config -->
+    <div class="section">
+      <h3>Hours Configuration</h3>
+      <label>Working hours per day:
+        <input type="number" name="hours_per_day" min="1" max="10" required>
+      </label>
+      <label>Lecture duration (hours):
+        <select name="lecture_duration" required>
+          <option value="1">1 Hour</option>
+          <option value="2">2 Hours</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- Subjects -->
+    <div class="section">
+      <h3>Subjects</h3>
+      <div id="subjects">
+        <div class="input-group">
+          <label>Subject Name: <input type="text" name="subject_name[]" required></label>
+          <label>Teacher Name: <input type="text" name="teacher[]" required></label>
+          <label>Sessions per week: <input type="number" name="sessions[]" min="1" max="10" required></label>
+          <label>Type:
+            <select name="type[]">
+              <option value="Lecture">Lecture</option>
+              <option value="Lab">Lab</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button type="button" onclick="addSubject()">+ Add Another Subject</button>
+    </div>
+
+    <!-- Groups -->
+    <div class="section">
+      <h3>Student Groups</h3>
+      <div id="groups">
+        <input type="text" name="groups[]" placeholder="Group Name" required>
+      </div>
+      <button type="button" onclick="addGroup()">+ Add Group</button>
+    </div>
+
+    <!-- Rooms -->
+    <div class="section">
+      <h3>Rooms</h3>
+      <div id="rooms">
+        <input type="text" name="rooms[]" placeholder="Room Name" required>
+      </div>
+      <button type="button" onclick="addRoom()">+ Add Room</button>
+    </div>
+
+    <button type="submit">Generate Schedule</button>
+  </form>
+
+  <script>
+    function addSubject() {
+      const container = document.getElementById("subjects");
+      const newEntry = document.createElement("div");
+      newEntry.classList.add("input-group");
+      newEntry.innerHTML = `
+        <label>Subject Name: <input type="text" name="subject_name[]" required></label>
+        <label>Teacher Name: <input type="text" name="teacher[]" required></label>
+        <label>Sessions per week: <input type="number" name="sessions[]" min="1" max="10" required></label>
+        <label>Type:
+          <select name="type[]">
+            <option value="Lecture">Lecture</option>
+            <option value="Lab">Lab</option>
+          </select>
+        </label>
+        <hr>
+      `;
+      container.appendChild(newEntry);
+    }
+
+    function addGroup() {
+      const container = document.getElementById("groups");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "groups[]";
+      input.required = true;
+      input.placeholder = "Group Name";
+      container.appendChild(input);
+    }
+
+    function addRoom() {
+      const container = document.getElementById("rooms");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "rooms[]";
+      input.required = true;
+      input.placeholder = "Room Name";
+      container.appendChild(input);
+    }
+  </script>
+
+</body>
+</html>
