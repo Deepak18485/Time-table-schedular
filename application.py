@@ -60,7 +60,7 @@ def generate_schedule():
     success = scheduler.generate_schedule_greedy()
 
     if success:
-        scheduler.export_to_csv("static/generated_schedule.csv")
+        scheduler.export_to_csv("C:/Users/MANISH/OneDrive/Desktop/Project/PBL(DAA)/DAA-PBL/DAA-Project/static/generated_schedule.csv")
         return render_template("success.html")
     else:
         return "Could not generate schedule", 500
