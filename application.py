@@ -1,127 +1,126 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect
+from datetime import datetime
+from collections import defaultdict
 from Schedular import EnhancedScheduler
 import mysql.connector
+import os
 
 app = Flask(__name__)
 
-# Database connection
+# ✅ MySQL connection
 conn = mysql.connector.connect(
-    host='localhost',
-    user='root',
-    password='',
-    database='timetable'
+    host="localhost",
+    user="root",
+    password="",  # Use your actual MySQL password here
+    database="timetable"
 )
 cursor = conn.cursor()
 
-USERNAME = "admin"
-PASSWORD = "admin123"
-
-def clear_cursor():
-    try:
-        cursor.fetchall()
-    except:
-        pass
-
+# ✅ Redirect base URL to form
 @app.route("/")
-def index():
-    return redirect(url_for("admin_login"))
+def home():
+    return redirect("/input")
 
-@app.route("/admin", methods=["GET", "POST"])
-def admin_login():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        if username == USERNAME and password == PASSWORD:
-            return redirect(url_for("input_page"))
-        else:
-            return "Invalid login", 401
-    return render_template("admin.html")
-
+# ✅ Input form route
 @app.route("/input")
 def input_page():
-    clear_cursor()
     cursor.execute("SELECT Subname FROM subjects")
     subjects = [row[0] for row in cursor.fetchall()]
 
-    clear_cursor()
     cursor.execute("SELECT name FROM teachers")
     teachers = [row[0] for row in cursor.fetchall()]
 
-    clear_cursor()
     cursor.execute("SELECT room_name FROM rooms")
     rooms = [row[0] for row in cursor.fetchall()]
 
     return render_template("input.html", subjects=subjects, teachers=teachers, rooms=rooms)
 
+# ✅ Schedule generation route
 @app.route("/generate", methods=["POST"])
-def generate_schedule():
-    # Time range input
-    start_time = request.form.get("start_time")
-    end_time = request.form.get("end_time")
-    working_days = request.form.getlist("working_days")
+def generate_schedule_display():
+    try:
+        # Time and lecture slot logic
+        start_time_str = request.form.get("start_time")
+        end_time_str = request.form.get("end_time")
+        lecture_duration = int(request.form.get("lecture_duration"))
+        working_days = request.form.getlist("working_days")
 
-    # Filter timeslots from DB within selected time range
-    clear_cursor()
-    cursor.execute("""
-        SELECT day, slot_id FROM timeslots
-        WHERE start_time >= %s AND end_time <= %s
-    """, (start_time, end_time))
-    timeslot_results = cursor.fetchall()
+        fmt = "%H:%M"
+        start_dt = datetime.strptime(start_time_str, fmt)
+        end_dt = datetime.strptime(end_time_str, fmt)
+        total_hours = int((end_dt - start_dt).total_seconds() // 3600)
 
-    # Convert to format: [('Monday', 0), ('Monday', 1), ...]
-    time_slots = [(row[0], row[1]) for row in timeslot_results]
+        # Groups and Rooms
+        groups = request.form.getlist("groups[]")
+        rooms = request.form.getlist("rooms[]")
 
-    # Collecting form data
-    groups = request.form.getlist("groups[]")
-    rooms = request.form.getlist("rooms[]")
-    subject_names = request.form.getlist("subject_name[]")
-    teachers = request.form.getlist("teacher[]")
-    sessions = request.form.getlist("sessions[]")
-    types = request.form.getlist("type[]")
-    lecture_duration = int(request.form.get("lecture_duration"))
+        # Subjects
+        subject_names = request.form.getlist("subject_name[]")
+        teachers = request.form.getlist("teacher[]")
+        sessions = request.form.getlist("sessions[]")
+        types = request.form.getlist("type[]")
 
-    # Build subjects dictionary
-    subjects = {}
-    for i in range(len(subject_names)):
-        subjects[subject_names[i]] = {
-            "teacher": teachers[i],
-            "sessions_per_week": int(sessions[i]),
-            "type": types[i]
+        subjects = {}
+        for i in range(len(subject_names)):
+            subjects[subject_names[i]] = {
+                "teacher": teachers[i],
+                "sessions_per_week": int(sessions[i]),
+                "type": types[i]
+            }
+
+        # 🧠 Create scheduler
+        scheduler = EnhancedScheduler(
+            subjects=subjects,
+            student_groups=groups,
+            rooms=rooms,
+            working_days=working_days,
+            hours_per_day=total_hours,
+            lecture_duration=lecture_duration
+        )
+
+        # Override time_slots with actual usable slots
+        slots_per_day = total_hours // lecture_duration
+        scheduler.time_slots = [(day, slot) for day in working_days for slot in range(slots_per_day)]
+
+        # Algorithm selector (greedy or backtracking)
+        algorithm = request.form.get("algorithm", "auto")
+        if algorithm == "greedy":
+            success = scheduler.generate_schedule_greedy()
+        else:
+            success = scheduler.generate_schedule()
+
+        # Return output
+        if success and scheduler.schedule:
+            schedule = structure_schedule_for_display(scheduler)
+            scheduler.export_to_csv("static/generated_schedule.csv")
+
+            return render_template(
+                "success.html",
+                schedule=schedule,
+                slots_per_day=slots_per_day,
+                working_days=working_days,
+                file_path="static/generated_schedule.csv"
+            )
+        else:
+            return render_template("error.html", message="❌ Failed to generate schedule.")
+    
+    except Exception as e:
+        return render_template("error.html", message=f"Error: {str(e)}")
+
+# ✅ Utility: Format for table rendering
+def structure_schedule_for_display(scheduler):
+    structured = defaultdict(lambda: defaultdict(dict))
+    for (subject, group, session_index), (day, slot, room) in scheduler.schedule.items():
+        teacher = scheduler.subjects[subject]['teacher']
+        structured[group][day][slot] = {
+            'subject': subject,
+            'teacher': teacher,
+            'room': room,
+            'session': session_index + 1
         }
+    return structured
 
-    scheduler = EnhancedScheduler(
-        subjects=subjects,
-        student_groups=groups,
-        rooms=rooms,
-        working_days=working_days,
-        hours_per_day=0,  # not used now
-        lecture_duration=lecture_duration
-    )
-    # Replace internal time_slots
-    scheduler.time_slots = time_slots
-
-    success = scheduler.generate_schedule()
-
-    if success and scheduler.schedule:
-        # Build table data
-        schedule_data = []
-        for (subject, group, session_index), (day, slot, room) in sorted(
-            scheduler.schedule.items(), key=lambda x: (x[1][0], x[1][1])
-        ):
-            teacher = scheduler.subjects[subject]['teacher']
-            schedule_data.append({
-                'day': day,
-                'slot': f"Slot {slot + 1}",
-                'group': group,
-                'subject': subject,
-                'teacher': teacher,
-                'room': room,
-                'session': session_index + 1
-            })
-
-        return render_template("success.html", schedule=schedule_data)
-    else:
-        return render_template("error.html", message="Failed to generate schedule, even with backtracking.")
-
+# ✅ Start server
 if __name__ == "__main__":
+    os.makedirs("static", exist_ok=True)
     app.run(debug=True)

@@ -2,231 +2,211 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Input Page - Timetable Scheduler</title>
+  <title>Timetable Scheduler</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #dbefff, #f0fcff);
-      margin: 0;
+      background: #eef6fa;
       padding: 30px;
     }
     h1 {
       text-align: center;
       color: #2c3e50;
-      margin-bottom: 30px;
     }
     form {
-      max-width: 800px;
+      max-width: 900px;
       margin: auto;
     }
     .section {
-      background: #ffffff;
-      padding: 25px;
-      margin-bottom: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .section h3 {
-      margin-top: 0;
-      color: #2980b9;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 10px;
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
     label {
       display: block;
-      margin-top: 15px;
-      color: #333;
+      margin: 10px 0 5px;
+      font-weight: bold;
     }
     input, select {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 8px;
+      padding: 8px;
+      border-radius: 5px;
       border: 1px solid #ccc;
-      font-size: 16px;
     }
     button {
-      margin-top: 20px;
-      padding: 12px 20px;
-      background-color: #27ae60;
+      margin-top: 15px;
+      padding: 10px 16px;
+      background: #3498db;
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
+      border-radius: 5px;
       cursor: pointer;
     }
     button:hover {
-      background-color: #1e8449;
-    }
-    .checkbox-group label {
-      display: inline-block;
-      margin-right: 15px;
+      background: #2980b9;
     }
     .input-group {
       margin-bottom: 15px;
     }
-    hr {
-      margin: 20px 0;
+    .checkbox-group label {
+      display: inline-block;
+      margin-right: 15px;
+      font-weight: normal;
     }
   </style>
 </head>
 <body>
 
-  <h1>Schedule Input Form</h1>
+<h1>Schedule Input Form</h1>
 
-  <form action="/generate" method="post">
+<form action="/generate" method="post">
 
-    <!-- Working Days -->
-    <div class="section">
-      <h3>Working Days</h3>
-      <div class="checkbox-group">
-        <label><input type="checkbox" name="working_days" value="Monday"> Monday</label>
-        <label><input type="checkbox" name="working_days" value="Tuesday"> Tuesday</label>
-        <label><input type="checkbox" name="working_days" value="Wednesday"> Wednesday</label>
-        <label><input type="checkbox" name="working_days" value="Thursday"> Thursday</label>
-        <label><input type="checkbox" name="working_days" value="Friday"> Friday</label>
-        <label><input type="checkbox" name="working_days" value="Saturday"> Saturday</label>
-      </div>
+  <!-- Working Days -->
+  <div class="section">
+    <h3>Working Days</h3>
+    <div class="checkbox-group">
+      {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] %}
+        <label><input type="checkbox" name="working_days" value="{{ day }}"> {{ day }}</label>
+      {% endfor %}
     </div>
+  </div>
 
-    <!-- Time Range -->
-    <div class="section">
-      <h3>Time Range</h3>
-      <label>Start Time:
-        <input type="time" name="start_time" required>
-      </label>
-      <label>End Time:
-        <input type="time" name="end_time" required>
-      </label>
-      <label>Lecture duration (hours):
-        <select name="lecture_duration" required>
-          <option value="1">1 Hour</option>
-          <option value="2">2 Hours</option>
-        </select>
-      </label>
-    </div>
+  <!-- Time Range -->
+  <div class="section">
+    <h3>Time Range</h3>
+    <label>Start Time:</label>
+    <input type="time" name="start_time" required>
 
-    <!-- Subjects -->
-    <div class="section">
-      <h3>Subjects</h3>
-      <div id="subjects">
-        <div class="input-group">
-          <label>Subject:
-            <select name="subject_name[]" required>
-              {% for sub in subjects %}
-              <option value="{{ sub }}">{{ sub }}</option>
-              {% endfor %}
-            </select>
-          </label>
-          <label>Teacher:
-            <select name="teacher[]" required>
-              {% for teacher in teachers %}
-              <option value="{{ teacher }}">{{ teacher }}</option>
-              {% endfor %}
-            </select>
-          </label>
-          <label>Sessions per week:
-            <input type="number" name="sessions[]" min="1" max="10" required>
-          </label>
-          <label>Type:
-            <select name="type[]">
-              <option value="Lecture">Lecture</option>
-              <option value="Lab">Lab</option>
-            </select>
-          </label>
-        </div>
-      </div>
-      <button type="button" onclick="addSubject()">+ Add Another Subject</button>
-    </div>
+    <label>End Time:</label>
+    <input type="time" name="end_time" required>
 
-    <!-- Groups -->
-    <div class="section">
-      <h3>Student Groups</h3>
-      <div id="groups">
-        <input type="text" name="groups[]" placeholder="Group Name" required>
-      </div>
-      <button type="button" onclick="addGroup()">+ Add Group</button>
-    </div>
+    <label>Lecture Duration (hours):</label>
+    <select name="lecture_duration" required>
+      <option value="1">1 Hour</option>
+      <option value="2">2 Hours</option>
+    </select>
+  </div>
 
-    <!-- Rooms -->
-    <div class="section">
-      <h3>Rooms</h3>
-      <div id="rooms">
-        <select name="rooms[]" required>
-          {% for room in rooms %}
-          <option value="{{ room }}">{{ room }}</option>
+  <!-- Subjects -->
+  <div class="section">
+    <h3>Subjects</h3>
+    <div id="subjects">
+      <div class="input-group">
+        <label>Subject:</label>
+        <select name="subject_name[]" required>
+          {% for sub in subjects %}
+          <option value="{{ sub }}">{{ sub }}</option>
           {% endfor %}
         </select>
+
+        <label>Teacher:</label>
+        <select name="teacher[]" required>
+          {% for teacher in teachers %}
+          <option value="{{ teacher }}">{{ teacher }}</option>
+          {% endfor %}
+        </select>
+
+        <label>Sessions per week:</label>
+        <input type="number" name="sessions[]" min="1" max="10" required>
+
+        <label>Type:</label>
+        <select name="type[]">
+          <option value="Lecture">Lecture</option>
+          <option value="Lab">Lab</option>
+        </select>
       </div>
-      <button type="button" onclick="addRoom()">+ Add Room</button>
     </div>
+    <button type="button" onclick="addSubject()">+ Add Another Subject</button>
+  </div>
 
-    <button type="submit">Generate Schedule</button>
-  </form>
+  <!-- Groups -->
+  <div class="section">
+    <h3>Student Groups</h3>
+    <div id="groups">
+      <input type="text" name="groups[]" placeholder="Group Name" required>
+    </div>
+    <button type="button" onclick="addGroup()">+ Add Group</button>
+  </div>
 
-  <!-- JavaScript Block -->
-  <script>
-    const roomList = {{ rooms | tojson | safe }};
+  <!-- Rooms -->
+  <div class="section">
+    <h3>Rooms</h3>
+    <div id="rooms">
+      <select name="rooms[]" required>
+        {% for room in rooms %}
+        <option value="{{ room }}">{{ room }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="button" onclick="addRoom()">+ Add Room</button>
+  </div>
 
-    function addSubject() {
-      const container = document.getElementById("subjects");
-      const newEntry = document.createElement("div");
-      newEntry.classList.add("input-group");
-      newEntry.innerHTML = `
-        <label>Subject:
-          <select name="subject_name[]" required>
-            {% for sub in subjects %}
-            <option value="{{ sub }}">{{ sub }}</option>
-            {% endfor %}
-          </select>
-        </label>
-        <label>Teacher:
-          <select name="teacher[]" required>
-            {% for teacher in teachers %}
-            <option value="{{ teacher }}">{{ teacher }}</option>
-            {% endfor %}
-          </select>
-        </label>
-        <label>Sessions per week:
-          <input type="number" name="sessions[]" min="1" max="10" required>
-        </label>
-        <label>Type:
-          <select name="type[]">
-            <option value="Lecture">Lecture</option>
-            <option value="Lab">Lab</option>
-          </select>
-        </label>
-        <hr>
-      `;
-      container.appendChild(newEntry);
-    }
+  <button type="submit">Generate Schedule</button>
+</form>
 
-    function addGroup() {
-      const container = document.getElementById("groups");
-      const input = document.createElement("input");
-      input.type = "text";
-      input.name = "groups[]";
-      input.required = true;
-      input.placeholder = "Group Name";
-      container.appendChild(input);
-    }
+<!-- JavaScript -->
+<script>
+  const roomList = {{ rooms | tojson | safe }};
 
-    function addRoom() {
-      const container = document.getElementById("rooms");
-      const select = document.createElement("select");
-      select.name = "rooms[]";
-      select.required = true;
+  function addSubject() {
+    const container = document.getElementById("subjects");
+    const div = document.createElement("div");
+    div.classList.add("input-group");
+    div.innerHTML = `
+      <label>Subject:</label>
+      <select name="subject_name[]" required>
+        {% for sub in subjects %}
+        <option value="{{ sub }}">{{ sub }}</option>
+        {% endfor %}
+      </select>
 
-      roomList.forEach(room => {
-        const option = document.createElement("option");
-        option.value = room;
-        option.textContent = room;
-        select.appendChild(option);
-      });
+      <label>Teacher:</label>
+      <select name="teacher[]" required>
+        {% for teacher in teachers %}
+        <option value="{{ teacher }}">{{ teacher }}</option>
+        {% endfor %}
+      </select>
 
-      container.appendChild(select);
-    }
-  </script>
+      <label>Sessions per week:</label>
+      <input type="number" name="sessions[]" min="1" max="10" required>
+
+      <label>Type:</label>
+      <select name="type[]">
+        <option value="Lecture">Lecture</option>
+        <option value="Lab">Lab</option>
+      </select>
+    `;
+    container.appendChild(div);
+  }
+
+  function addGroup() {
+    const container = document.getElementById("groups");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.name = "groups[]";
+    input.required = true;
+    input.placeholder = "Group Name";
+    container.appendChild(input);
+  }
+
+  function addRoom() {
+    const container = document.getElementById("rooms");
+    const select = document.createElement("select");
+    select.name = "rooms[]";
+    select.required = true;
+
+    roomList.forEach(room => {
+      const option = document.createElement("option");
+      option.value = room;
+      option.textContent = room;
+      select.appendChild(option);
+    });
+
+    container.appendChild(select);
+  }
+</script>
 
 </body>
 </html>
