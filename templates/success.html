@@ -2,9 +2,94 @@
 <html>
 <head>
   <title>Schedule Generated</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 40px;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #eee;
+    }
+    h2 {
+      margin-top: 50px;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 </head>
 <body>
-  <h2>Schedule Successfully Generated!</h2>
+
+  <h1>Schedule Successfully Generated!</h1>
   <p><a href="{{ file_path }}" download>Download Schedule CSV</a></p>
+  <button onclick="downloadPDF()">Download Timetable as PDF</button>
+  {% for group, timetable in schedule.items() %}
+    <h2>Timetable for {{ group }}</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Slot</th>
+          {% for day in working_days %}
+            <th>{{ day }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for slot in range(slots_per_day) %}
+          <tr>
+            <td>Slot {{ slot + 1 }}</td>
+            {% for day in working_days %}
+              <td>
+                {% if timetable[day][slot] %}
+                  <b>{{ timetable[day][slot].subject }}</b><br>
+                  {{ timetable[day][slot].teacher }}<br>
+                  Room: {{ timetable[day][slot].room }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endfor %}
+
+
+  <script>
+async function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+
+  const pdf = new jsPDF('p', 'pt', 'a4');
+
+  // Select the timetable portion
+  const timetable = document.body;
+
+  // Capture it with html2canvas
+  const canvas = await html2canvas(timetable, {
+    scale: 2,
+    useCORS: true
+  });
+
+  const imgData = canvas.toDataURL('image/png');
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const imgProps = pdf.getImageProperties(imgData);
+  const pdfWidth = pageWidth;
+  const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+  pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+  pdf.save("timetable.pdf");
+}
+</script>
+
 </body>
 </html>
