@@ -1,4 +1,37 @@
 Day,Slot,Group,Subject,Teacher,Room,Session
-Tuesday,Slot 1,s2,hkl,anupam ,103,1
-Tuesday,Slot 2,s2,hkl,anupam ,103,2
-Tuesday,Slot 3,s2,hkl,anupam ,103,3
+Monday,Slot 1,A1,DAA,Anupam,103,1
+Monday,Slot 1,A2,Automata,Ajay,102,1
+Monday,Slot 1,B1,Micro lab,devesh,101,1
+Monday,Slot 2,A1,DAA,Anupam,103,2
+Monday,Slot 2,A2,Automata,Ajay,102,2
+Monday,Slot 2,B1,Micro lab,devesh,101,2
+Monday,Slot 3,A1,DAA,Anupam,103,3
+Monday,Slot 3,A2,Automata,Ajay,102,3
+Monday,Slot 3,B2,Micro lab,devesh,101,1
+Monday,Slot 4,A1,Automata,Ajay,103,1
+Monday,Slot 4,A2,DAA,Anupam,102,1
+Monday,Slot 4,B2,Micro lab,devesh,101,2
+Monday,Slot 5,A1,Automata,Ajay,103,2
+Monday,Slot 5,A2,DAA,Anupam,102,2
+Monday,Slot 6,A1,Automata,Ajay,103,3
+Monday,Slot 6,A2,DAA,Anupam,102,3
+Monday,Slot 7,A1,Automata,Ajay,103,4
+Monday,Slot 7,A2,Micro lab,devesh,102,1
+Monday,Slot 7,B1,DAA,Anupam,101,1
+Monday,Slot 8,A1,Micro lab,devesh,103,1
+Monday,Slot 8,A2,Automata,Ajay,102,4
+Monday,Slot 8,B1,DAA,Anupam,101,2
+Monday,Slot 9,A1,Micro lab,devesh,103,2
+Monday,Slot 9,B1,DAA,Anupam,102,3
+Monday,Slot 9,B2,Automata,Ajay,101,1
+Monday,Slot 10,A2,Micro lab,devesh,103,2
+Monday,Slot 10,B1,Automata,Ajay,102,1
+Monday,Slot 10,B2,DAA,Anupam,101,1
+Tuesday,Slot 1,B1,Automata,Ajay,103,2
+Tuesday,Slot 1,B2,DAA,Anupam,102,2
+Tuesday,Slot 2,B1,Automata,Ajay,103,3
+Tuesday,Slot 2,B2,DAA,Anupam,102,3
+Tuesday,Slot 3,B1,Automata,Ajay,103,4
+Tuesday,Slot 4,B2,Automata,Ajay,103,2
+Tuesday,Slot 5,B2,Automata,Ajay,103,3
+Tuesday,Slot 6,B2,Automata,Ajay,103,4
