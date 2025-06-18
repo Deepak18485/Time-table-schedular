@@ -1,9 +1,9 @@
 import mysql.connector
 
 conn = mysql.connector.connect(
-    host='127.0.0.1',
+    host='localhost',
     user='root',
-    password='Abhas@12345',
+    password='',
     database='timetable'
 )
 cursor = conn.cursor()

@@ -1,10 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Schedule Generated</title>
+  <title>Generated Timetable</title>
+  <style>
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+    th { background-color: #2980b9; color: white; }
+  </style>
 </head>
 <body>
-  <h2>Schedule Successfully Generated!</h2>
-  <p><a href="{{ file_path }}" download>Download Schedule CSV</a></p>
+  <h2>Generated Timetable</h2>
+  <table>
+    <tr>
+      <th>Day</th>
+      <th>Slot</th>
+      <th>Group</th>
+      <th>Subject</th>
+      <th>Teacher</th>
+      <th>Room</th>
+      <th>Session</th>
+    </tr>
+    {% for entry in schedule %}
+    <tr>
+      <td>{{ entry.day }}</td>
+      <td>{{ entry.slot }}</td>
+      <td>{{ entry.group }}</td>
+      <td>{{ entry.subject }}</td>
+      <td>{{ entry.teacher }}</td>
+      <td>{{ entry.room }}</td>
+      <td>{{ entry.session }}</td>
+    </tr>
+    {% endfor %}
+  </table>
 </body>
 </html>
