@@ -37,8 +37,9 @@
         <tr>
           <th>Day / Slot</th>
           {% for slot in range(slots_per_day) %}
-          <th>Slot {{ slot + 1 }}</th>
+            <th>{{ time_labels[slot] }}</th>
           {% endfor %}
+
         </tr>
       </thead>
       <tbody>

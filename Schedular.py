@@ -1,5 +1,6 @@
 import os
 import csv
+from datetime import timedelta
 
 class EnhancedScheduler:
     def __init__(self, subjects, student_groups, rooms, working_days, hours_per_day, lecture_duration):
@@ -7,11 +8,15 @@ class EnhancedScheduler:
         self.groups = student_groups
         self.rooms = rooms
         self.working_days = working_days
-        self.slots_per_day = (hours_per_day // lecture_duration)
+        self.slots_per_day = hours_per_day // lecture_duration
         self.lecture_duration = lecture_duration
         self.time_slots = [(day, slot) for day in self.working_days for slot in range(self.slots_per_day)]
         self.lecture_requests = []
         self.schedule = {}
+
+        # Classify rooms into lab and lecture based on name
+        self.lab_rooms = [room for room in self.rooms if 'lab' in room.lower()]
+        self.lecture_rooms = [room for room in self.rooms if 'lab' not in room.lower()]
 
     def generate_lecture_requests(self):
         self.lecture_requests.clear()
@@ -24,7 +29,6 @@ class EnhancedScheduler:
         teacher = self.subjects[subject]['teacher']
         for (subj, grp, idx), (day, slot, assigned_room) in current_schedule.items():
             if (day, slot) == time_slot:
-                # Conflict if same group, same teacher, or same room at same time
                 if grp == group or self.subjects[subj]['teacher'] == teacher or assigned_room == room:
                     return True
         return False
@@ -35,8 +39,9 @@ class EnhancedScheduler:
 
         for subject, group, session_index in self.lecture_requests:
             assigned = False
+            room_type = self.lab_rooms if self.subjects[subject]['type'].lower() == 'lab' else self.lecture_rooms
             for time_slot in self.time_slots:
-                for room in self.rooms:
+                for room in room_type:
                     if not self.is_conflict(subject, group, room, time_slot, current_schedule):
                         current_schedule[(subject, group, session_index)] = (*time_slot, room)
                         assigned = True
@@ -50,7 +55,6 @@ class EnhancedScheduler:
         return True
 
     def generate_schedule(self):
-        """Try greedy, then fall back to backtracking if needed."""
         if self.generate_schedule_greedy():
             return True
         return self.generate_schedule_backtracking()
@@ -66,8 +70,9 @@ class EnhancedScheduler:
             return True
 
         subject, group, session_index = self.lecture_requests[index]
+        room_type = self.lab_rooms if self.subjects[subject]['type'].lower() == 'lab' else self.lecture_rooms
         for time_slot in self.time_slots:
-            for room in self.rooms:
+            for room in room_type:
                 if not self.is_conflict(subject, group, room, time_slot, current_schedule):
                     current_schedule[(subject, group, session_index)] = (*time_slot, room)
                     if self.backtrack(index + 1, current_schedule):
@@ -76,6 +81,9 @@ class EnhancedScheduler:
         return False
 
     def export_to_csv(self, filename="static/generated_schedule.csv"):
+        if not self.schedule:
+            raise ValueError("No schedule available to export.")
+        
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, 'w', newline='') as f:
             writer = csv.writer(f)

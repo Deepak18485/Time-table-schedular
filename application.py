@@ -12,7 +12,7 @@ app.secret_key = "supersecretkey"
 conn = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="",  # Set your MySQL root password if needed
+    password="",  
     database="timetable"
 )
 cursor = conn.cursor()
@@ -149,6 +149,17 @@ def generate_schedule_display():
         slots_per_day = total_hours // lecture_duration
         scheduler.time_slots = [(day, slot) for day in working_days for slot in range(slots_per_day)]
 
+        # Generate time slot labels (e.g., 09:00 - 10:00)  
+        from datetime import timedelta
+
+        time_labels = []
+        current_time = start_dt
+        for _ in range(slots_per_day):
+            end_time = current_time + timedelta(hours=lecture_duration)
+            time_labels.append(f"{current_time.strftime('%H:%M')} - {end_time.strftime('%H:%M')}")
+            current_time = end_time
+
+
         algorithm = request.form.get("algorithm", "auto")
         success = scheduler.generate_schedule_greedy() if algorithm == "greedy" else scheduler.generate_schedule()
 
@@ -156,7 +167,7 @@ def generate_schedule_display():
             schedule = structure_schedule_for_display(scheduler)
             scheduler.export_to_csv("static/generated_schedule.csv")
             return render_template("success.html", schedule=schedule, slots_per_day=slots_per_day,
-                                   working_days=working_days, file_path="static/generated_schedule.csv")
+                                   working_days=working_days, file_path="static/generated_schedule.csv",time_labels=time_labels)
         else:
             return render_template("error.html", message="❌ Failed to generate schedule.")
 
