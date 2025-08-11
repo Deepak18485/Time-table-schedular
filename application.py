@@ -13,7 +13,7 @@ conn = mysql.connector.connect(
     host="localhost",
     user="root",
     password="",  
-    database="timetable"
+    database="timetable_db"
 )
 cursor = conn.cursor()
 
@@ -54,7 +54,8 @@ def add_subject():
         return redirect("/admin")
     if request.method == "POST":
         name = request.form.get("subject_name")
-        cursor.execute("INSERT INTO subjects (Subname) VALUES (%s)", (name,))
+        subcode = request.form.get("subcode")
+        cursor.execute("INSERT INTO subjects (Subname,Subcode) VALUES (%s,%s)", (name,subcode))
         conn.commit()
         return redirect("/dashboard")
     return render_template("add_subject.html")
@@ -78,7 +79,7 @@ def add_room():
         return redirect("/admin")
     if request.method == "POST":
         name = request.form.get("room_name")
-        cursor.execute("INSERT INTO rooms (room_name) VALUES (%s)", (name,))
+        cursor.execute("INSERT INTO rooms (room_name) VALUES (%s)", (name))
         conn.commit()
         return redirect("/dashboard")
     return render_template("add_room.html")

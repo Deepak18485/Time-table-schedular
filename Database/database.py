@@ -4,7 +4,7 @@ conn = mysql.connector.connect(
     host='localhost',
     user='root',
     password='',
-    database='timetable'
+    database='timetable_db'
 )
 cursor = conn.cursor()
 def clear_cursor():
